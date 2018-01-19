@@ -10,8 +10,10 @@ object SparkStreamingWordCount {
     val conf = new SparkConf()
       .setAppName("StreamingWordCount")
       .setMaster("local[2]")
+      //See https://spark.apache.org/docs/latest/configuration.html#spark-streaming
       .set("spark.streaming.backpressure.enabled", "true")
       .set("spark.streaming.stopGracefullyOnShutdown", "true")
+      .set("spark.streaming.receiver.writeAheadLog.enable", "true")
 
     val ssc: StreamingContext = new StreamingContext(conf, Seconds(5))
 
