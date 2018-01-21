@@ -8,10 +8,10 @@ object Simple {
   case class Record(title: String,
                     link: String,
                     description: String,
-                    category: String,
+                    category: Option[String],
                     enclosure: Option[NodeSeq],
-                    guid: String,
-                    pubDate: String
+                    guid: Option[String],
+                    pubDate: Option[String]
                    )
 
   // todo handle XML escape characters like &amp; &quot; &apos; &lt; &gt;
@@ -19,15 +19,17 @@ object Simple {
     Record((n \\ "title").text,
       (n \\ "link").text,
       (n \\ "description").text,
-      (n \\ "category").text,
+      Some((n \\ "category").text),
       Some(n \\ "enclosure"),
-      (n \\ "guid").text,
-      (n \\ "pubDate").text
+      Some((n \\ "guid").text),
+      Some((n \\ "pubDate").text)
     )
   }
 
   def main(args: Array[String]): Unit = {
-    val response = Http("https://rg.ru/xml/index.xml")
+//    val response = Http("https://rg.ru/xml/index.xml")
+//    val response = Http("https://russian.rt.com/rss")
+    val response = Http("http://feeds.bbci.co.uk/news/world/rss.xml")
     .timeout(connTimeoutMs = 3000, readTimeoutMs = 10000)
     .asString
 
@@ -60,6 +62,11 @@ object Simple {
     itemNodes
       .take(1)
       .map(processItemNode)
-      .foreach(x => println(x.pubDate, x.category, x.title, x.enclosure.get))
+      .foreach(x => println(x.pubDate.get, x.category.get, x.title, x.enclosure.get))
+
+    println(itemNodes
+      .take(1)
+      .map(processItemNode).head)
+
   }
 }
