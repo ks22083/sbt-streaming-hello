@@ -14,6 +14,7 @@ object Simple {
                     pubDate: String
                    )
 
+  // todo handle XML escape characters like &amp; &quot; &apos; &lt; &gt;
   def processItemNode(n: Node): Record = {
     Record((n \\ "title").text,
       (n \\ "link").text,
@@ -25,7 +26,6 @@ object Simple {
     )
   }
 
-
   def main(args: Array[String]): Unit = {
     val response = Http("https://rg.ru/xml/index.xml")
     .timeout(connTimeoutMs = 3000, readTimeoutMs = 10000)
@@ -33,6 +33,26 @@ object Simple {
 
     val xml = XML.loadString(response.body)
     //println(response)
+
+    case class ChannelInfo(title: String, link: String,
+                           description: String, language: String,
+                           imageURL:String
+                          )
+
+    val chanNode: NodeSeq = xml \\ "rss" \ "channel"
+    chanNode.head.child
+      .filter(x => x.label != "item" && !x.isAtom)
+      .foreach(println)
+
+    val chanInfo  = ChannelInfo(
+      (chanNode \ "title").text,
+      (chanNode \ "link").text,
+      (chanNode \ "description").text,
+      (chanNode \ "language").text,
+      (chanNode \ "image" \ "url" ).text
+    )
+
+    println(chanInfo+"\n")
 
     val itemNodes = xml \\ "item"
     itemNodes.take(1).foreach(println)

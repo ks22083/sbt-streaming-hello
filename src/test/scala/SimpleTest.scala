@@ -4,7 +4,7 @@ class SimpleTest extends FunSuite {
 
   test("should pass") {
     print("test passed")
-    assert(condition = true)
+    assert(true)
   }
 
   ignore("Should be ignored") {
