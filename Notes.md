@@ -6,6 +6,7 @@ Add link to *.md examples and tutorial
 1. [Github guide:Mastering Markdown](https://guides.github.com/features/mastering-markdown/)
 1. [Github help:Basic writing and formatting syntax
 ](https://help.github.com/articles/basic-writing-and-formatting-syntax/)
+1. [John Gruber's Page](https://daringfireball.net/projects/markdown/)
 
 ## TOC
 * [SBT Notes](#sbt-notes)
