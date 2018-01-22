@@ -29,12 +29,15 @@ object Simple {
   def main(args: Array[String]): Unit = {
 //    val response = Http("https://rg.ru/xml/index.xml")
 //    val response = Http("https://russian.rt.com/rss")
-    val response = Http("http://feeds.bbci.co.uk/news/world/rss.xml")
+//    val response = Http("http://feeds.bbci.co.uk/news/world/rss.xml")
+//  fontanka need conversion from windows-1251
+//    val response = Http("http://www.fontanka.ru/fontanka.rss")
+    val response = Http("http://www.fontanka.ru/fontanka.rss")
     .timeout(connTimeoutMs = 3000, readTimeoutMs = 10000)
     .asString
 
-    val xml = XML.loadString(response.body)
     //println(response)
+    val xml = XML.loadString(response.body)
 
     case class ChannelInfo(title: String, link: String,
                            description: String, language: String,
