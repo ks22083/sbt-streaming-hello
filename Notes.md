@@ -12,11 +12,11 @@ Add link to *.md examples and tutorial
 ```bash
 $ sbt 
 [info] Loading settings from idea.sbt ...
-[info] Loading global plugins from /home/esi/.sbt/1.0/plugins
-[info] Loading project definition from /home/esi/temp/TEMP.sbt-streaming-hello.TEMP/project
+[info] Loading global plugins from /home/user/.sbt/1.0/plugins
+[info] Loading project definition from /home/user/project_dir/project
 [info] Loading settings from build.sbt ...
-[info] Set current project to sbt-streaming-hello (in build file:/home/esi/temp/TEMP.sbt-streaming-hello.TEMP/)
-[info] sbt server started at local:///home/esi/.sbt/1.0/server/8400c48360dc66ed869f/sock
+[info] Set current project to sbt-streaming-hello (in build file:/home/user/project_dir/project/)
+[info] sbt server started at local:///home/user/.sbt/1.0/server/8400c48360dc66ed869f/sock
 ```
 With console you can evaluate current project settings for example
 ```scala
@@ -36,10 +36,10 @@ sbt:sbt-streaming-hello> show scalaBinaryVersion
 ...
 sbt:sbt-streaming-hello> reload
 [info] Loading settings from idea.sbt ...
-[info] Loading global plugins from /home/esi/.sbt/1.0/plugins
-[info] Loading project definition from /home/esi/temp/TEMP.sbt-streaming-hello.TEMP/project
+[info] Loading global plugins from /home/user/.sbt/1.0/plugins
+[info] Loading project definition from /home/user/project_dir/project
 [info] Loading settings from build.sbt ...
-[info] Set current project to sbt-streaming-hello (in build file:/home/esi/temp/TEMP.sbt-streaming-hello.TEMP/)
+[info] Set current project to sbt-streaming-hello (in build file:/home/user/project_dir/project/)
 sbt:sbt-streaming-hello> show libraryDependencies
 [info] * org.scala-lang:scala-library:2.11.12
 [info] * org.scalaj:scalaj-http:2.3.0
