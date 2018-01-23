@@ -60,8 +60,16 @@ object Simple {
       case e: SocketTimeoutException => println(s"$e URL:${response.url}"); System.exit(1)
     }
 
+    val declAttrs: Map[String,String] = response.asString.body
+      .split("\\?")(1).split(" ").toList
+      .filter(_ != "xml")
+      .map((x) => {val kv=x.split("="); (kv(0).toLowerCase(),kv(1).replace("\"", "")) })
+      .toMap
     // TODO there should be a way to get encoding from XML declaration
-    val xml = XML.load(new InputStreamReader(new ByteArrayInputStream(response.asBytes.body), "windows-1251"))
+    val xml = XML
+        .load(new InputStreamReader(
+          new ByteArrayInputStream(response.asBytes.body), declAttrs getOrElse ("encoding", "UTF-8"))
+        )
     // TODO transform url with formatter
     // TODO handle XML escape characters like &amp; &quot; &apos; &lt; &gt;
     val formatter = new PrettyPrinter(240,4)
