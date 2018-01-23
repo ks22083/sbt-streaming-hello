@@ -1,5 +1,7 @@
 package bigdata.scaping.xml
 
+import java.io.{ByteArrayInputStream, InputStreamReader}
+
 import scala.xml.{Node, NodeSeq, XML}
 import scalaj.http.Http
 
@@ -34,10 +36,12 @@ object Simple {
 //    val response = Http("http://www.fontanka.ru/fontanka.rss")
     val response = Http("http://www.fontanka.ru/fontanka.rss")
     .timeout(connTimeoutMs = 3000, readTimeoutMs = 10000)
-    .asString
+//    .asString
 
-    //println(response)
-    val xml = XML.loadString(response.body)
+    println(response.asBytes.toString)
+//    println(new String(response.asBytes.body, "Windows-1251"))
+//    val xml = XML.loadString(response.asString.body)
+    val xml = XML.load(new InputStreamReader(new ByteArrayInputStream(response.asBytes.body)))
 
     case class ChannelInfo(title: String, link: String,
                            description: String, language: String,
