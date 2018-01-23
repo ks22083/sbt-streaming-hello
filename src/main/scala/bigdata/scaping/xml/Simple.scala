@@ -3,15 +3,17 @@ package bigdata.scaping.xml
 import java.io.{ByteArrayInputStream, InputStreamReader}
 import java.net.{SocketTimeoutException, UnknownHostException}
 
-import scala.xml.{Node, NodeSeq, PrettyPrinter, XML}
+import scala.xml._
 import scalaj.http.Http
 
 object Simple {
 
+  sealed abstract class rssNode ()
+
   case class ChannelInfo(title: String, link: String,
                          description: String, language: String,
                          imageURL:String
-                        )
+                        ) extends rssNode
 
   case class Record(title: String,
                     link: String,
@@ -20,7 +22,7 @@ object Simple {
                     enclosure: Option[NodeSeq],
                     guid: Option[String],
                     pubDate: Option[String]
-                   )
+                   ) extends rssNode
 
   def processItemNode(n: Node): Record = {
     Record((n \\ "title").text,
@@ -39,13 +41,17 @@ object Simple {
 //    val response = Http("https://russian.rt.com/rss")
 //    val response = Http("http://feeds.bbci.co.uk/news/world/rss.xml")
 //  fontanka need conversion from windows-1251
-//    val response = Http("http://www.fontanka.ru/fontanka.rss")
     val response = Http("http://www.fontanka.ru/fontanka.rss")
+//    val response = Http("http://fontanka.ru/fontanka.rss") // Page moved
     .timeout(connTimeoutMs = 3000, readTimeoutMs = 10000)
 
     try {
       response.asBytes.code match {
         case 200 => println("Ok")
+        case 301 =>
+          // "http://fontanka.ru/fontanka.rss"
+          println(s"Page moved: ${response.asString.body}")
+          System.exit(1)
         case 404 => println(s"Page not found: ${response.url}"); System.exit(1)
         case n: Int => println(s"${response.asString}\nResponse code: $n"); System.exit(1)
       }
