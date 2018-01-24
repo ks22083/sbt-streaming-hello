@@ -1,7 +1,7 @@
 package bigdata.scaping.xml
 
 import java.io.{ByteArrayInputStream, InputStreamReader}
-import java.net.{SocketTimeoutException, UnknownHostException}
+import java.net.{ConnectException, SocketTimeoutException, UnknownHostException}
 
 import scala.xml._
 import scalaj.http.Http
@@ -43,6 +43,7 @@ object Simple {
 //  fontanka need conversion from windows-1251
     val response = Http("http://www.fontanka.ru/fontanka.rss")
 //    val response = Http("http://fontanka.ru/fontanka.rss") // Page moved
+//    val response = Http("http://localhost/fontanka.rss") // Connection refused
     .timeout(connTimeoutMs = 3000, readTimeoutMs = 10000)
 
     try {
@@ -58,6 +59,7 @@ object Simple {
     } catch {
       case e: UnknownHostException => println(s"Host not found: ${e.getMessage}"); System.exit(1)
       case e: SocketTimeoutException => println(s"$e URL:${response.url}"); System.exit(1)
+      case e: ConnectException => println(s"$e URL:${response.url}"); System.exit(1)
     }
 
     val declAttrs: Map[String,String] = response.asString.body
