@@ -3,6 +3,9 @@ package bigdata.scaping.xml
 import java.io.{ByteArrayInputStream, InputStreamReader}
 import java.net.{ConnectException, MalformedURLException, SocketTimeoutException, UnknownHostException}
 
+import org.joda.time.DateTime
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
+
 import scala.xml._
 import scalaj.http.{Http, HttpConstants, HttpResponse}
 
@@ -21,8 +24,23 @@ object Simple {
                     category: Option[String],
                     enclosure: Option[NodeSeq],
                     guid: Option[String],
-                    pubDate: Option[String]
+                    pubDate: Option[DateTime]
                    ) extends rssNode
+
+  private val jodaParsers = Array(
+    DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss Z").getParser,
+    DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss ZZZ").getParser,
+    DateTimeFormat.forPattern("dd MMM yyyy HH:mm:ss ZZZ").getParser,
+    DateTimeFormat.forPattern("dd MMM yyyy HH:mm:ss Z").getParser
+  )
+
+  private val jodaFormatter = new DateTimeFormatterBuilder()
+    .append(null, jodaParsers) // use parsers array
+    .toFormatter.withOffsetParsed()
+
+  def parsePubDate(dateStr: String): Option[DateTime] = {
+      Some(jodaFormatter.parseDateTime(dateStr))
+  }
 
   def processItemNode(n: Node): Record = {
     Record((n \\ "title").text,
@@ -31,7 +49,7 @@ object Simple {
       Some((n \\ "category").text),
       Some(n \\ "enclosure"),
       Some((n \\ "guid").text),
-      Some((n \\ "pubDate").text)
+      parsePubDate((n \\ "pubDate").text)
     )
   }
 

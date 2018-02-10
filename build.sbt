@@ -10,6 +10,7 @@ val sparkVersion = "2.2.0"
 
 libraryDependencies ++= Seq(
   "org.scalaj" %% "scalaj-http" % "2.3.0",
+  "joda-time" % "joda-time" % "2.9.9",
   "org.apache.spark" %% "spark-core" % sparkVersion,
   "org.apache.spark" %% "spark-streaming" % sparkVersion,
   "org.scalatest" %% "scalatest" % "3.0.4" % "test"
