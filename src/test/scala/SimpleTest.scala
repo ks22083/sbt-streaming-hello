@@ -28,7 +28,9 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
     try {
       testSet.foreach(Simple.parsePubDate)
     } catch {
-      case e: Exception => fail()
+      case e: Exception =>
+        e.printStackTrace()
+        fail()
     }
 
   }

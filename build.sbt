@@ -5,6 +5,7 @@ version := "0.1"
 scalaVersion := "2.11.12"
 
 mainClass in (Compile, run) := Some("bigdata.streaming.spark.SparkStreamingWordCount")
+mainClass in (Compile, packageBin) := Some("bigdata.streaming.spark.SparkStreamingWordCount")
 
 val sparkVersion = "2.2.0"
 

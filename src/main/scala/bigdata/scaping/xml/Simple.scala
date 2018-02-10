@@ -2,6 +2,7 @@ package bigdata.scaping.xml
 
 import java.io.{ByteArrayInputStream, InputStreamReader}
 import java.net.{ConnectException, MalformedURLException, SocketTimeoutException, UnknownHostException}
+import java.util.Locale
 
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
@@ -15,7 +16,8 @@ object Simple {
 
   case class ChannelInfo(title: String, link: String,
                          description: String, language: String,
-                         imageURL:String
+                         imageURL: String,
+                         pubDate: Option[String]
                         ) extends rssNode
 
   case class Record(title: String,
@@ -36,7 +38,7 @@ object Simple {
 
   private val jodaFormatter = new DateTimeFormatterBuilder()
     .append(null, jodaParsers) // use parsers array
-    .toFormatter.withOffsetParsed()
+    .toFormatter.withLocale(Locale.ENGLISH).withOffsetParsed()
 
   def parsePubDate(dateStr: String): Option[DateTime] = {
       Some(jodaFormatter.parseDateTime(dateStr))
@@ -55,6 +57,7 @@ object Simple {
 
   // todo handle XML escape characters like &amp; &quot; &apos; &lt; &gt;
   def main(args: Array[String]): Unit = {
+//    val request = Http("https://sdelanounas.ru/index/rss")
 //    val request = Http("https://rg.ru/xml/index.xml")
 //    val request = Http("https://russian.rt.com/rss")
 //    val request = Http("http://feeds.bbci.co.uk/news/world/rss.xml")
@@ -133,7 +136,8 @@ object Simple {
       (chanNode \ "link").text,
       (chanNode \ "description").text,
       (chanNode \ "language").text,
-      (chanNode \ "image" \ "url" ).text
+      (chanNode \ "image" \ "url" ).text,
+      Some((chanNode \ "pubDate" ).text)
     )
 
     println(chanInfo+"\n")
@@ -150,5 +154,12 @@ object Simple {
       .take(1)
       .map(processItemNode).head)
 
+    println(s"title:${chanInfo.title}\ndescr:${chanInfo.description}\npDate:${chanInfo.pubDate.getOrElse("?")}")
+    val recs = itemNodes.map(processItemNode)
+      recs.foreach(x => println(s"${x.category.get}, ${x.link}"))
+    //http://allaboutscala.com/tutorials/chapter-8-beginner-tutorial-using-scala-collection-functions/scala-reduce-example/
+    println(recs.map(x => x.category.get).groupBy(x=>x).mapValues(_.size))
+    println(itemNodes.size)
   }
+
 }
