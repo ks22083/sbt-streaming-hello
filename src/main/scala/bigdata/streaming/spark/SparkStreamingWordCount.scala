@@ -9,11 +9,11 @@ object SparkStreamingWordCount {
   def createStreamingContext(checkpointDir: String): StreamingContext = {
     val conf = new SparkConf()
       .setAppName("StreamingWordCount")
-      .setMaster("local[2]")
+      .setMaster("local[*]")
       //See https://spark.apache.org/docs/latest/configuration.html#spark-streaming
       .set("spark.streaming.backpressure.enabled", "true")
       .set("spark.streaming.stopGracefullyOnShutdown", "true")
-      .set("spark.streaming.receiver.writeAheadLog.enable", "true")
+//      .set("spark.streaming.receiver.writeAheadLog.enable", "true")
 
     val ssc: StreamingContext = new StreamingContext(conf, Seconds(5))
 

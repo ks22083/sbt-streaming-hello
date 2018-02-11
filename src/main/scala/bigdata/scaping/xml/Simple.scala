@@ -155,11 +155,26 @@ object Simple {
       .map(processItemNode).head)
 
     println(s"title:${chanInfo.title}\ndescr:${chanInfo.description}\npDate:${chanInfo.pubDate.getOrElse("?")}")
+
     val recs = itemNodes.map(processItemNode)
       recs.foreach(x => println(s"${x.category.get}, ${x.link}"))
     //http://allaboutscala.com/tutorials/chapter-8-beginner-tutorial-using-scala-collection-functions/scala-reduce-example/
     println(recs.map(x => x.category.get).groupBy(x=>x).mapValues(_.size))
     println(itemNodes.size)
+
+    println(recs.map(x => x.category.get).foldLeft(Map.empty[String, Int]){
+      (count, word) => count + (word -> (count.getOrElse(word, 0) + 1))
+    }.toList.sortBy(-_._2))
+
+  }
+
+  def fileWordCount(filename: String): Map[String, Int] = {
+    scala.io.Source.fromFile(filename)
+      .getLines
+      .flatMap(_.split("\\W+"))
+      .foldLeft(Map.empty[String, Int]){
+        (count, word) => count + (word -> (count.getOrElse(word, 0) + 1))
+      }
   }
 
 }
