@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, InputStreamReader}
 import java.net.{ConnectException, MalformedURLException, SocketTimeoutException, UnknownHostException}
 import java.util.Locale
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeComparator, Period}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
 
 import scala.xml._
@@ -59,10 +59,11 @@ object Simple {
   def main(args: Array[String]): Unit = {
 //    val request = Http("https://sdelanounas.ru/index/rss")
 //    val request = Http("https://rg.ru/xml/index.xml")
-//    val request = Http("https://russian.rt.com/rss")
-//    val request = Http("http://feeds.bbci.co.uk/news/world/rss.xml")
+//    val request = Http("https://russian.rt.com/rss") // url/category/type
+//    val request = Http("http://feeds.bbci.co.uk/news/world/rss.xml") // type[news]/location[world-latin-america]
+    val request = Http("http://rss.cnn.com/rss/edition.rss")
 //  fontanka need conversion from windows-1251
-    val request = Http("http://www.fontanka.ru/fontanka.rss")
+//    val request = Http("http://www.fontanka.ru/fontanka.rss")
 //    val request = Http("http://fontanka.ru/fontanka.rss") // Page moved
 //    val request = Http("http://localhost/fontanka.rss") // Connection refused
 //    val request = Http("http://apache.spark.org/") // Service unavailable
@@ -157,15 +158,21 @@ object Simple {
     println(s"title:${chanInfo.title}\ndescr:${chanInfo.description}\npDate:${chanInfo.pubDate.getOrElse("?")}")
 
     val recs = itemNodes.map(processItemNode)
-      recs.foreach(x => println(s"${x.category.get}, ${x.link}"))
+    recs.foreach(x => println(s"${x.category.get}, ${x.link}"))
     //http://allaboutscala.com/tutorials/chapter-8-beginner-tutorial-using-scala-collection-functions/scala-reduce-example/
     println(recs.map(x => x.category.get).groupBy(x=>x).mapValues(_.size))
-    println(itemNodes.size)
+    val rssSize = itemNodes.size
+//    println(itemNodes.size)
 
-    println(recs.map(x => x.category.get).foldLeft(Map.empty[String, Int]){
+    val categoryMap = recs.map(x => x.category.get).foldLeft(Map.empty[String, Int]){
       (count, word) => count + (word -> (count.getOrElse(word, 0) + 1))
-    }.toList.sortBy(-_._2))
+    }
 
+    println(categoryMap.toList.sortBy(-_._2))
+
+    val minMax = dateMinMax(recs)
+    val period = new Period(minMax._1, minMax._2)
+    println( s"$rssSize events in ${period.getMinutes}min. (${rssSize.toFloat/period.getMinutes} ev/min) min=${minMax._1} max=${minMax._2}")
   }
 
   def fileWordCount(filename: String): Map[String, Int] = {
@@ -175,6 +182,16 @@ object Simple {
       .foldLeft(Map.empty[String, Int]){
         (count, word) => count + (word -> (count.getOrElse(word, 0) + 1))
       }
+  }
+
+  def dateMinMax(recs: Seq[Record]): (DateTime, DateTime) = {
+    val comparator = DateTimeComparator.getInstance()
+    //TODO handle empty list
+    recs.foldLeft(recs.head.pubDate.get, recs.head.pubDate.get)
+    { case ((min:DateTime, max: DateTime), e: Record) =>
+      (if (comparator.compare(min, e.pubDate.get) < 0) min else e.pubDate.get,
+       if (comparator.compare(max, e.pubDate.get) >= 0) max else e.pubDate.get)
+    }
   }
 
 }
