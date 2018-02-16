@@ -41,7 +41,6 @@ object Simple {
     .toFormatter.withLocale(Locale.ENGLISH).withOffsetParsed()
 
   def parsePubDate(dateStr: String): Option[DateTime] = {
-    println(s"->$dateStr")
     try {
       Some(jodaFormatter.parseDateTime(dateStr))
     } catch {
@@ -50,7 +49,6 @@ object Simple {
   }
 
   def processItemNode(n: Node): Record = {
-    println(n)
     Record((n \\ "title").text,
       (n \\ "link").text,
       (n \\ "description").text,
@@ -65,8 +63,9 @@ object Simple {
   def main(args: Array[String]): Unit = {
 //    val request = Http("https://sdelanounas.ru/index/rss")
 //    val request = Http("https://rg.ru/xml/index.xml")
+    val request = Http("https://lenta.ru/rss/news")
 //    val request = Http("https://russian.rt.com/rss") // url/category/type
-    val request = Http("https://www.rt.com/rss/") // url/category/type
+//    val request = Http("https://www.rt.com/rss/") // url/category/type
 //    val request = Http("http://feeds.bbci.co.uk/news/world/rss.xml") // type[news]/location[world-latin-america]
 //    val request = Http("http://rss.cnn.com/rss/edition.rss")
 //  fontanka need conversion from windows-1251
