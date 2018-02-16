@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, InputStreamReader}
 import java.net.{ConnectException, MalformedURLException, SocketTimeoutException, UnknownHostException}
 import java.util.Locale
 
-import org.joda.time.{DateTime, DateTimeComparator, Period}
+import org.joda.time.{DateTime, DateTimeComparator, Duration, Period}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
 
 import scala.xml._
@@ -41,10 +41,16 @@ object Simple {
     .toFormatter.withLocale(Locale.ENGLISH).withOffsetParsed()
 
   def parsePubDate(dateStr: String): Option[DateTime] = {
+    println(s"->$dateStr")
+    try {
       Some(jodaFormatter.parseDateTime(dateStr))
+    } catch {
+      case ila: IllegalArgumentException => None
+    }
   }
 
   def processItemNode(n: Node): Record = {
+    println(n)
     Record((n \\ "title").text,
       (n \\ "link").text,
       (n \\ "description").text,
@@ -60,8 +66,9 @@ object Simple {
 //    val request = Http("https://sdelanounas.ru/index/rss")
 //    val request = Http("https://rg.ru/xml/index.xml")
 //    val request = Http("https://russian.rt.com/rss") // url/category/type
+    val request = Http("https://www.rt.com/rss/") // url/category/type
 //    val request = Http("http://feeds.bbci.co.uk/news/world/rss.xml") // type[news]/location[world-latin-america]
-    val request = Http("http://rss.cnn.com/rss/edition.rss")
+//    val request = Http("http://rss.cnn.com/rss/edition.rss")
 //  fontanka need conversion from windows-1251
 //    val request = Http("http://www.fontanka.ru/fontanka.rss")
 //    val request = Http("http://fontanka.ru/fontanka.rss") // Page moved
@@ -172,7 +179,18 @@ object Simple {
 
     val minMax = dateMinMax(recs)
     val period = new Period(minMax._1, minMax._2)
-    println( s"$rssSize events in ${period.getMinutes}min. (${rssSize.toFloat/period.getMinutes} ev/min) min=${minMax._1} max=${minMax._2}")
+    val duration = new Duration(minMax._1, minMax._2).getStandardMinutes
+    println( s"""$rssSize events in ${duration}min. (${rssSize.toFloat/duration} ev/min)
+                 |earliest=${minMax._1} latest=${minMax._2}""".stripMargin)
+
+    val c = DateTimeComparator.getInstance()
+    recs
+      .sortWith( (a, b) => if ( a.pubDate.isDefined && b.pubDate.isDefined
+        && c.compare(a.pubDate.get, b.pubDate.get) > 0 )
+        true
+      else
+        false)
+      .foreach(x => println(s"${x.pubDate.getOrElse("?")}, ${x.title}"))
   }
 
   def fileWordCount(filename: String): Map[String, Int] = {
@@ -189,8 +207,8 @@ object Simple {
     //TODO handle empty list
     recs.foldLeft(recs.head.pubDate.get, recs.head.pubDate.get)
     { case ((min:DateTime, max: DateTime), e: Record) =>
-      (if (comparator.compare(min, e.pubDate.get) < 0) min else e.pubDate.get,
-       if (comparator.compare(max, e.pubDate.get) >= 0) max else e.pubDate.get)
+      (if (comparator.compare(min, e.pubDate.getOrElse(max)) < 0) min else e.pubDate.get,
+       if (comparator.compare(max, e.pubDate.getOrElse(min)) >= 0) max else e.pubDate.get)
     }
   }
 
