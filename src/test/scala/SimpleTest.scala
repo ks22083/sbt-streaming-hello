@@ -3,8 +3,6 @@ import java.util.Locale
 import bigdata.scaping.xml.Simple
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.xml.Elem
-
 // See http://doc.scalatest.org/3.0.1/#org.scalatest.FunSuite
 class SimpleTest extends FunSuite with BeforeAndAfter {
 
@@ -24,6 +22,7 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
   test("should parse all dates") {
     val testSet = Seq(
       "10 Feb 2018 16:37:28 GMT",
+      "10 Feb 2018 16:24:27 +0300",
       "Sat, 10 Feb 2018 16:24:27 +0300",
       "Sat, 10 Feb 2018 16:18:04 GMT"
     )
@@ -35,18 +34,22 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
         e.printStackTrace()
         fail()
     }
-
   }
 
   test( "shouldn't parse this date" ) {
-    val testStr = "foo bar"
+    val testDate = "foo bar"
 
     try {
-      Simple.parsePubDate(testStr)
+      Simple.parsePubDate(testDate)
       fail("Exception was expected")
     } catch {
-      case e: Exception => assert (1 === 1) //pass
+      case e: Exception => succeed //pass
     }
+  }
+
+  test("should throw exception") {
+    val testDate = "foo bar"
+    intercept[IllegalArgumentException] { Simple.parsePubDate(testDate) }
   }
 
   test("should parse item correctly") {
@@ -64,14 +67,14 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
 
     val result = Simple.processItemNode(fullItem)
 
-    assert( result.title.trim === "«Росатом» и Республика Карелия построят ветропарк на берегу Белого моря")
+    assert( result.title === "«Росатом» и Республика Карелия построят ветропарк на берегу Белого моря")
     assert( result.link === "https://lenta.ru/news/2018/02/15/vetropark/")
     assert( result.category.get === "Экономика")
-    assert( result.description.replaceAll("""^\s+(?m)""", "").replaceAll("""(?m)\s+$""", "") ===
+//    assert( result.description.replaceAll("""^\s+(?m)""", "").replaceAll("""(?m)\s+$""", "") ===
+    assert( result.description ===
       "В рамках Российского инвестиционного форума в Сочи, глава Республики Карелии Артур Парфенчиков и генеральный директор АО «НоваВинд» (дивизиона Госкорпорации «Росатом» отвечающего за программы в новой энергетике) Александр Корчагин, обсудили перспективы проекта строительства ветропарка на берегу Белого моря.")
     assert( result.pubDate.get.toString("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH) ===
       "Thu, 15 Feb 2018 17:42:14 +0300")
-
   }
 
   test("Should be implemented") (pending)

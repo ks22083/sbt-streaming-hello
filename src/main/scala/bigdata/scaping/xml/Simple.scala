@@ -41,21 +41,17 @@ object Simple {
     .toFormatter.withLocale(Locale.ENGLISH).withOffsetParsed()
 
   def parsePubDate(dateStr: String): Option[DateTime] = {
-    try {
-      Some(jodaFormatter.parseDateTime(dateStr))
-    } catch {
-      case ila: IllegalArgumentException => None
-    }
+    Some(jodaFormatter.parseDateTime(dateStr))
   }
 
   def processItemNode(n: Node): Record = {
-    Record((n \\ "title").text,
+    Record((n \\ "title").text.trim,
       (n \\ "link").text,
-      (n \\ "description").text,
+      (n \\ "description").text.trim,
       Some((n \\ "category").text),
       Some(n \\ "enclosure"),
       Some((n \\ "guid").text),
-      parsePubDate((n \\ "pubDate").text)
+      try {parsePubDate((n \\ "pubDate").text)} catch { case e: IllegalArgumentException => None}
     )
   }
 
@@ -189,7 +185,7 @@ object Simple {
         true
       else
         false)
-      .foreach(x => println(s"${x.pubDate.getOrElse("?")}, ${x.title}"))
+      .foreach(x => println(s"${x.pubDate.getOrElse("?")}, ${x.title}\n${' '*8}${x.description}"))
   }
 
   def fileWordCount(filename: String): Map[String, Int] = {
