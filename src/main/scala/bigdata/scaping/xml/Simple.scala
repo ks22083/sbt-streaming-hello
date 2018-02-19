@@ -59,13 +59,13 @@ object Simple {
   def main(args: Array[String]): Unit = {
 //    val request = Http("https://sdelanounas.ru/index/rss")
 //    val request = Http("https://rg.ru/xml/index.xml")
-    val request = Http("https://lenta.ru/rss/news")
+//    val request = Http("https://lenta.ru/rss/news")
 //    val request = Http("https://russian.rt.com/rss") // url/category/type
 //    val request = Http("https://www.rt.com/rss/") // url/category/type
 //    val request = Http("http://feeds.bbci.co.uk/news/world/rss.xml") // type[news]/location[world-latin-america]
 //    val request = Http("http://rss.cnn.com/rss/edition.rss")
 //  fontanka need conversion from windows-1251
-//    val request = Http("http://www.fontanka.ru/fontanka.rss")
+    val request = Http("http://www.fontanka.ru/fontanka.rss")
 //    val request = Http("http://fontanka.ru/fontanka.rss") // Page moved
 //    val request = Http("http://localhost/fontanka.rss") // Connection refused
 //    val request = Http("http://apache.spark.org/") // Service unavailable
@@ -125,7 +125,7 @@ object Simple {
           new ByteArrayInputStream(response.body), declAttrs getOrElse ("encoding", respCharset/*"UTF-8"*/))
         )
     // TODO transform url with formatter
-    // TODO handle XML escape characters like &amp; &quot; &apos; &lt; &gt;
+    // TODO handle XML escape characters like &amp; &quot; &apos; &lt; &gt; _&laquo;_ &nbsp;
 
     val formatter = new PrettyPrinter(240,4)
 
@@ -167,7 +167,7 @@ object Simple {
 //    println(itemNodes.size)
 
     val categoryMap = recs.map(x => x.category.get).foldLeft(Map.empty[String, Int]){
-      (count, word) => count + (word -> (count.getOrElse(word, 0) + 1))
+      (count: Map[String, Int], word: String) => count + (word -> (count.getOrElse(word, 0) + 1))
     }
 
     println(categoryMap.toList.sortBy(-_._2))
@@ -179,13 +179,17 @@ object Simple {
                  |earliest=${minMax._1} latest=${minMax._2}""".stripMargin)
 
     val c = DateTimeComparator.getInstance()
-    recs
-      .sortWith( (a, b) => if ( a.pubDate.isDefined && b.pubDate.isDefined
-        && c.compare(a.pubDate.get, b.pubDate.get) > 0 )
-        true
-      else
-        false)
-      .foreach(x => println(s"${x.pubDate.getOrElse("?")}, ${x.title}\n${' '*8}${x.description}"))
+    val sortedRecs = recs
+      .sortWith((a, b) => (a.pubDate.isDefined && b.pubDate.isDefined
+        && c.compare(a.pubDate.get, b.pubDate.get) > 0) )
+
+    sortedRecs.foreach(x => println(s"${x.pubDate.getOrElse("?")}, ${x.title}\n${" "*10}${x.description}"))
+
+    val durationList = sortedRecs.map(x => x.pubDate.get)
+      .foldLeft((List.empty[Duration], new DateTime))
+      {(acc, tStamp) => (acc._1 :+ new Duration(tStamp, acc._2), tStamp)}
+
+    println(durationList._1.map(x=>x.getStandardMinutes))
   }
 
   def fileWordCount(filename: String): Map[String, Int] = {
