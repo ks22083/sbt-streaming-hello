@@ -53,7 +53,11 @@ object Simple {
       Some((n \\ "category").map(_.text)),
       Some(n \\ "enclosure"),
       Some((n \\ "guid").text),
-      try {parsePubDate((n \\ "pubDate").text)} catch { case e: IllegalArgumentException => None}
+      try {
+        parsePubDate((n \\ "pubDate").text)
+      } catch {
+        case e: IllegalArgumentException => None
+      }
     )
   }
 
@@ -68,7 +72,8 @@ object Simple {
 //    val request = Http("http://rss.cnn.com/rss/edition.rss")
 //    val request = Http("https://www.theguardian.com/world/rss")
 //    val request = Http("https://www.theguardian.com/world/russia/rss")
-    val request = Http("http://rss.nytimes.com/services/xml/rss/nyt/World.xml")
+//    val request = Http("http://rss.nytimes.com/services/xml/rss/nyt/World.xml")
+    val request = Http("http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml")
 //  fontanka need conversion from windows-1251
 //    val request = Http("http://www.fontanka.ru/fontanka.rss")
 //    val request = Http("http://fontanka.ru/fontanka.rss") // Page moved
@@ -194,9 +199,9 @@ object Simple {
 
     val durationList = sortedRecs.map(x => x.pubDate.get)
       .foldLeft((List.empty[Duration], new DateTime))
-      {(acc, tStamp) => (acc._1 :+ new Duration(tStamp, acc._2), tStamp)}
+      {(acc, tStamp) => (acc._1 :+ new Duration(tStamp, acc._2), tStamp)}._1
 
-    println(durationList._1.map(x=>x.getStandardMinutes))
+    println(durationList.map(x=>x.getStandardMinutes))
   }
 
   def fileWordCount(filename: String): Map[String, Int] = {
