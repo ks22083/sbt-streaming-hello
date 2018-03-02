@@ -14,16 +14,18 @@ object Simple {
 
   sealed abstract class rssNode ()
 
-  case class ChannelInfo(title: String, link: String,
-                         description: String, language: String,
-                         imageURL: String,
+  case class ChannelInfo(title: String,
+                         link: String,
+                         description: String,
+                         language: Option[String],
+                         imageURL: Option[String],
                          pubDate: Option[String]
                         ) extends rssNode
 
   case class Record(title: String,
                     link: String,
                     description: String,
-                    category: Option[String],
+                    category: Option[Seq[String]],
                     enclosure: Option[NodeSeq],
                     guid: Option[String],
                     pubDate: Option[DateTime]
@@ -48,7 +50,7 @@ object Simple {
     Record((n \\ "title").text.trim,
       (n \\ "link").text,
       (n \\ "description").text.trim,
-      Some((n \\ "category").text),
+      Some((n \\ "category").map(_.text)),
       Some(n \\ "enclosure"),
       Some((n \\ "guid").text),
       try {parsePubDate((n \\ "pubDate").text)} catch { case e: IllegalArgumentException => None}
@@ -59,11 +61,14 @@ object Simple {
   def main(args: Array[String]): Unit = {
 //    val request = Http("https://sdelanounas.ru/index/rss")
 //    val request = Http("https://rg.ru/xml/index.xml")
-    val request = Http("https://lenta.ru/rss/news")
+//    val request = Http("https://lenta.ru/rss/news")
 //    val request = Http("https://russian.rt.com/rss") // url/category/type
 //    val request = Http("https://www.rt.com/rss/") // url/category/type
 //    val request = Http("http://feeds.bbci.co.uk/news/world/rss.xml") // type[news]/location[world-latin-america]
 //    val request = Http("http://rss.cnn.com/rss/edition.rss")
+//    val request = Http("https://www.theguardian.com/world/rss")
+//    val request = Http("https://www.theguardian.com/world/russia/rss")
+    val request = Http("http://rss.nytimes.com/services/xml/rss/nyt/World.xml")
 //  fontanka need conversion from windows-1251
 //    val request = Http("http://www.fontanka.ru/fontanka.rss")
 //    val request = Http("http://fontanka.ru/fontanka.rss") // Page moved
@@ -80,6 +85,7 @@ object Simple {
         case 301 => println(s"Page Moved: ${evalRequest.get.toString}")
           // Better to handle forwarding
 
+          println(s"${request.url}->${evalRequest.get.header("Location").get}")
           System.exit(1)
         case 404 => println(s"Page Not Found: ${request.url}")
           System.exit(1)
@@ -97,6 +103,7 @@ object Simple {
     }
 
     val response = evalRequest.getOrElse(throw new RuntimeException())
+    println(response.headers)
     /* All this code has written because in case
      * WHEN http server didn't return charset for the xml content-type
      *   AND incoming xml declaration has encoding = "some-encoding"
@@ -138,8 +145,8 @@ object Simple {
       (chanNode \ "title").text,
       (chanNode \ "link").text,
       (chanNode \ "description").text,
-      (chanNode \ "language").text,
-      (chanNode \ "image" \ "url" ).text,
+      Some((chanNode \ "language").text),
+      Some((chanNode \ "image" \ "url" ).text),
       Some((chanNode \ "pubDate" ).text)
     )
 
@@ -160,13 +167,13 @@ object Simple {
     println(s"title:${chanInfo.title}\ndescr:${chanInfo.description}\npDate:${chanInfo.pubDate.getOrElse("?")}")
 
     val recs = itemNodes.map(processItemNode)
-    recs.foreach(x => println(s"${x.category.get}, ${x.link}"))
+//    recs.foreach(x => println(s"${x.category.get}, ${x.link}"))
     //http://allaboutscala.com/tutorials/chapter-8-beginner-tutorial-using-scala-collection-functions/scala-reduce-example/
     println(recs.map(x => x.category.get).groupBy(x=>x).mapValues(_.size))
     val rssSize = itemNodes.size
 //    println(itemNodes.size)
 
-    val categoryMap = recs.map(x => x.category.get).foldLeft(Map.empty[String, Int]){
+    val categoryMap = recs.flatMap(x => x.category.get).foldLeft(Map.empty[String, Int]){
       (count, word) => count + (word -> (count.getOrElse(word, 0) + 1))
     }
 
@@ -185,7 +192,7 @@ object Simple {
         true
       else
         false)
-      .foreach(x => println(s"${x.pubDate.getOrElse("?")}, ${x.title}\n${' '*8}${x.description}"))
+      .foreach(x => println(s"${x.pubDate.getOrElse("?")}, ${x.title}"))
   }
 
   def fileWordCount(filename: String): Map[String, Int] = {

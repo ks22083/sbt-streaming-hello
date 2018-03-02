@@ -1,6 +1,5 @@
 import java.util.Locale
-
-import bigdata.scaping.xml.Simple
+import bigdata.scaping.xml.Simple.{parsePubDate, processItemNode}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 // See http://doc.scalatest.org/3.0.1/#org.scalatest.FunSuite
@@ -28,7 +27,7 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
     )
 
     try {
-      testSet.foreach(Simple.parsePubDate)
+      testSet.foreach(parsePubDate)
     } catch {
       case e: Exception =>
         e.printStackTrace()
@@ -40,7 +39,7 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
     val testDate = "foo bar"
 
     try {
-      Simple.parsePubDate(testDate)
+      parsePubDate(testDate)
       fail("Exception was expected")
     } catch {
       case e: Exception => succeed //pass
@@ -49,7 +48,7 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
 
   test("should throw exception") {
     val testDate = "foo bar"
-    intercept[IllegalArgumentException] { Simple.parsePubDate(testDate) }
+    intercept[IllegalArgumentException] { parsePubDate(testDate) }
   }
 
   test("should parse item correctly") {
@@ -63,13 +62,14 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
       <pubDate>Thu, 15 Feb 2018 17:42:14 +0300</pubDate>
       <enclosure type="image/jpeg" length="141868" url="https://icdn.lenta.ru/images/2018/02/15/17/20180215172354775/pic_23daa977d78b3e17da331ca1ddcdc7d2.jpg"/>
       <category>Экономика</category>
+      <category>Карелия</category>
     </item>
 
-    val result = Simple.processItemNode(fullItem)
+    val result = processItemNode(fullItem)
 
     assert( result.title === "«Росатом» и Республика Карелия построят ветропарк на берегу Белого моря")
     assert( result.link === "https://lenta.ru/news/2018/02/15/vetropark/")
-    assert( result.category.get === "Экономика")
+    assert( result.category.get.sorted === Seq("Карелия", "Экономика").sorted)
 //    assert( result.description.replaceAll("""^\s+(?m)""", "").replaceAll("""(?m)\s+$""", "") ===
     assert( result.description ===
       "В рамках Российского инвестиционного форума в Сочи, глава Республики Карелии Артур Парфенчиков и генеральный директор АО «НоваВинд» (дивизиона Госкорпорации «Росатом» отвечающего за программы в новой энергетике) Александр Корчагин, обсудили перспективы проекта строительства ветропарка на берегу Белого моря.")
