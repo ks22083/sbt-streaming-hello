@@ -77,6 +77,12 @@ class SimpleTest extends FunSuite with BeforeAndAfter {
       "Thu, 15 Feb 2018 17:42:14 +0300")
   }
 
+  test("should perform sentiment analysis") {
+    import bigdata.scaping.xml.Simple.stanfordNLP
+    stanfordNLP("Lucy in the sky with diamonds. Hard day's night.")
+    stanfordNLP("Putin ‘Likely’ Ordered Russian Ex-Spy’s Poisoning, Britain Says")
+  }
+
   test("Should be implemented") (pending)
 
   ignore("Should be ignored") {

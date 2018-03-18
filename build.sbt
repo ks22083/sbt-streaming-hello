@@ -14,5 +14,8 @@ libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.9.9",
   "org.apache.spark" %% "spark-core" % sparkVersion,
   "org.apache.spark" %% "spark-streaming" % sparkVersion,
+  "edu.stanford.nlp" % "stanford-corenlp" % "3.9.1",
+  "edu.stanford.nlp" % "stanford-corenlp" % "3.9.1" classifier "models",
+  "edu.stanford.nlp" % "stanford-corenlp" % "3.9.1" % "test" classifier "models",
   "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 )

@@ -2,8 +2,10 @@ package bigdata.scaping.xml
 
 import java.io.{ByteArrayInputStream, InputStreamReader}
 import java.net.{ConnectException, MalformedURLException, SocketTimeoutException, UnknownHostException}
+import java.util
 import java.util.Locale
 
+import edu.stanford.nlp.simple.Sentence
 import org.joda.time.{DateTime, DateTimeComparator, Duration, Period}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
 
@@ -61,19 +63,35 @@ object Simple {
     )
   }
 
+  type SDocument = edu.stanford.nlp.simple.Document
+  import scala.collection.JavaConversions._
+
+  def stanfordNLP(text: String):Unit = {
+    //    val doc = new SDocument("Lucy in the sky with diamonds. Hard day's night.")
+    val doc = new SDocument(text)
+
+    doc.sentences().foreach(x => println (s">>$x>>${x.sentiment()}\n"))
+  }
+
+
+
   // todo handle XML escape characters like &amp; &quot; &apos; &lt; &gt;
   def main(args: Array[String]): Unit = {
+
+    stanfordNLP("This is a test")
 //    val request = Http("https://sdelanounas.ru/index/rss")
 //    val request = Http("https://rg.ru/xml/index.xml")
 //    val request = Http("https://lenta.ru/rss/news")
 //    val request = Http("https://russian.rt.com/rss") // url/category/type
 //    val request = Http("https://www.rt.com/rss/") // url/category/type
+//    val request = Http("https://www.bfm.ru/news.rss")
 //    val request = Http("http://feeds.bbci.co.uk/news/world/rss.xml") // type[news]/location[world-latin-america]
 //    val request = Http("http://rss.cnn.com/rss/edition.rss")
 //    val request = Http("https://www.theguardian.com/world/rss")
 //    val request = Http("https://www.theguardian.com/world/russia/rss")
-//    val request = Http("http://rss.nytimes.com/services/xml/rss/nyt/World.xml")
-    val request = Http("http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml")
+    val request = Http("http://rss.nytimes.com/services/xml/rss/nyt/World.xml")
+//    val request = Http("http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml")
+//    val request = Http("http://feeds.washingtonpost.com/rss/world") // No pubDate
 //  fontanka need conversion from windows-1251
 //    val request = Http("http://www.fontanka.ru/fontanka.rss")
 //    val request = Http("http://fontanka.ru/fontanka.rss") // Page moved
@@ -184,24 +202,58 @@ object Simple {
 
     println(categoryMap.toList.sortBy(-_._2))
 
-    val minMax = dateMinMax(recs)
-    val period = new Period(minMax._1, minMax._2)
-    val duration = new Duration(minMax._1, minMax._2).getStandardMinutes
-    println( s"""$rssSize events in ${duration}min. (${rssSize.toFloat/duration} ev/min)
-                 |earliest=${minMax._1} latest=${minMax._2}""".stripMargin)
 
+    // Sort incoming records by pubDate
     val c = DateTimeComparator.getInstance()
     val sortedRecs = recs
       .sortWith((a, b) => (a.pubDate.isDefined && b.pubDate.isDefined
         && c.compare(a.pubDate.get, b.pubDate.get) > 0) )
 
-    sortedRecs.foreach(x => println(s"${x.pubDate.getOrElse("?")}, ${x.title}\n${" "*10}${x.description}"))
+    sortedRecs
+      .foreach(x =>
+        println(s"""${x.pubDate.getOrElse("?")}, ${x.title}\n${" "*10}${x.description}\n${x.category.get}""".stripMargin))
 
+    //Top categories
+    val catMap = sortedRecs.flatMap(x => x.category.get).foldLeft(Map.empty[String, Int]){
+      (count, word) => count + (word -> (count.getOrElse(word, 0) + 1))
+    }.toList
+
+    println(catMap.sortBy(-_._2))
+
+    // Rate of news items
+    println("\n Channel stats")
+    val minMax = dateMinMax(recs)
+//    val period = new Period(minMax._1, minMax._2)
+    val duration = new Duration(minMax._1, minMax._2).getStandardMinutes
+    println( s"""$rssSize events in ${duration}min. (${rssSize.toFloat/duration} ev/min or ${rssSize.toFloat*60/duration} ev/hour)
+                |earliest=${minMax._1} latest=${minMax._2}""".stripMargin)
+
+    // List of periods between items
     val durationList = sortedRecs.map(x => x.pubDate.get)
       .foldLeft((List.empty[Duration], new DateTime))
       {(acc, tStamp) => (acc._1 :+ new Duration(tStamp, acc._2), tStamp)}._1
 
     println(durationList.map(x=>x.getStandardMinutes))
+
+    // Sentiment analysis
+    val titles = sortedRecs
+      .take(1)
+      .map(x => new SDocument(x.description))
+
+    titles.flatMap(_.sentences()).foreach( x=> println(x.sentiment()))
+
+    case class SentAn (title: String, decs: String, titleSA: String, descSA: String)
+    val analyzeThis = (x: Record) => SentAn(x.title, x.description,
+      new SDocument(x.title).sentences().map(_.sentiment()).toString(),
+      new SDocument(x.description).sentences().map(_.sentiment()).toString())
+    sortedRecs
+//      .take(1)
+      .foreach(x => println(analyzeThis(x)))
+//      .foreach((x: rssNode) => println(s"${x.title} - ${new SDocument(x.title).sentences().map(_.sentiment())}"))
+
+
+//        println(s"${x.title}->${new SDocument(x.title).sentences().foreach( x => println(x.sentiment()))}"))
+//
   }
 
   def fileWordCount(filename: String): Map[String, Int] = {
