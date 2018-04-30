@@ -10,6 +10,7 @@ mainClass in (Compile, packageBin) := Some("bigdata.streaming.spark.SparkStreami
 val sparkVersion = "2.2.0"
 
 libraryDependencies ++= Seq(
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.6.0",
   "org.scalaj" %% "scalaj-http" % "2.3.0",
   "joda-time" % "joda-time" % "2.9.9",
   "org.apache.spark" %% "spark-core" % sparkVersion,

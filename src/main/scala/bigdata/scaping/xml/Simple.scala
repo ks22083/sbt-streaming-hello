@@ -2,7 +2,6 @@ package bigdata.scaping.xml
 
 import java.io.{ByteArrayInputStream, InputStreamReader}
 import java.net.{ConnectException, MalformedURLException, SocketTimeoutException, UnknownHostException}
-import java.util
 import java.util.Locale
 
 import edu.stanford.nlp.simple.Sentence
@@ -248,7 +247,8 @@ object Simple {
       new SDocument(x.description).sentences().map(_.sentiment()).toString())
     sortedRecs
 //      .take(1)
-      .foreach(x => println(analyzeThis(x)))
+//      .foreach(x => println(analyzeThis(x)))
+      .foreach(x => {val sAn = analyzeThis(x); println(s"${sAn.titleSA}, ${sAn.descSA} - $sAn")})
 //      .foreach((x: rssNode) => println(s"${x.title} - ${new SDocument(x.title).sentences().map(_.sentiment())}"))
 
 
