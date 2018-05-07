@@ -4,8 +4,7 @@ import java.io.{ByteArrayInputStream, InputStreamReader}
 import java.net.{ConnectException, MalformedURLException, SocketTimeoutException, UnknownHostException}
 import java.util.Locale
 
-import edu.stanford.nlp.simple.Sentence
-import org.joda.time.{DateTime, DateTimeComparator, Duration, Period}
+import org.joda.time.{DateTime, DateTimeComparator, Duration}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
 
 import scala.xml._
@@ -69,7 +68,7 @@ object Simple {
     //    val doc = new SDocument("Lucy in the sky with diamonds. Hard day's night.")
     val doc = new SDocument(text)
 
-    doc.sentences().foreach(x => println (s">>$x>>${x.sentiment()}\n"))
+    doc.sentences().foreach(x => println (s">>$x<<${x.sentiment()}\n"))
   }
 
 
@@ -137,7 +136,7 @@ object Simple {
       HttpConstants.CharsetRegex.findFirstMatchIn(ct).map(_.group(1))
     }).getOrElse("ISO-8859-1")
     val declAttrs: Map[String,String] = new String(response.body, respCharset)
-      .split("\\?")(1).split(" ").toList
+      .split("\\?").head.split(" ").toList
       .filter(_ != "xml")
       .map((x) => {val kv=x.split("="); (kv(0).toLowerCase(),kv(1).replace("\"", "")) })
       .toMap
