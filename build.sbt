@@ -21,3 +21,22 @@ libraryDependencies ++= Seq(
   "edu.stanford.nlp" % "stanford-corenlp" % "3.9.1" % "test" classifier "models",
   "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 )
+
+initialCommands in console := """
+  import org.apache.spark.{SparkConf, SparkContext}
+
+  val conf = new SparkConf()
+  conf.setMaster("local[*]")
+  conf.setAppName("Simple Console Application")
+
+ val sc = new SparkContext(conf)
+
+//  val spark = SparkSession.builder()
+//    .master("local")
+//    .appName("spark-shell")
+//    .getOrCreate()
+//  import spark.implicits._
+//  val sc = spark.sparkContext
+"""
+
+cleanupCommands in console := "sc.stop()"
