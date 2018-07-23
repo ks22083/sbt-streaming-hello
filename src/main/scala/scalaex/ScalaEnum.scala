@@ -12,9 +12,17 @@ object  Weekdays extends  Enumeration {
 
 object ScalaEnum {
 
+  /**
+    * Generates the graph using the given dataset and markup.
+    *
+    * @param args When set to true, performs a sort of 'debug' trace, which takes a shitload of memory and doesnt write out the graph
+    *             asdf asdfasdf alksdjhf alksdhf alksdhj
+    *             skdfkajhsdf
+    *
+    *  @return
+    */
   def main(args: Array[String]): Unit = {
-    import scalaex.Weekdays._
-    val day = Mon
+    val day = Weekdays.Mon
 
     Weekdays.values.foreach(println)
 

@@ -12,7 +12,14 @@ import org.joda.time.format.DateTimeFormat
 object ScalaTime {
 
   val LOGGER = Logger[ScalaTime]
+  /**
+  Generates the graph using the given dataset and markup.
+    NOTE: This should only be called when a cached version is unavailable
+    param dataLocator Dataset location, other tags for writing trion
+  @param args When set to true, performs a sort of 'debug' trace, which takes a shitload of memory and doesnt write out the graph
 
+  @return
+    */
   def main(args: Array[String]): Unit = {
 
     println(s"timestamp func: ${timestamp()}")
