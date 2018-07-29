@@ -1,5 +1,14 @@
 How  to gracefully stop Spark Streaming context.
 
+* to run ```$nc -lk 9999``` or
+```
+/*
+   .....On the command line use: 
+         nc -L -p 9999 -v
+        --then type numbers followed by 'enter-key'
+   */
+```
+
 Here is [post](http://metabroadcast.com/blog/stop-your-spark-streaming-application-gracefully) outlining how to *gracefully stop a Spark Streaming application* in Scala.
 
 An here is java code

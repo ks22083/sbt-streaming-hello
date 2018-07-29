@@ -23,4 +23,12 @@ rdd2.toDebugString
 
 SparkEnv.get.closureSerializer
 
+//
+//val pagecounts = sc.textFile("~/Wikipediafiles/pagecounts-20160801-000000")
+//pagecounts.take(10).foreach(println)
+//println(s"Lines in pagecount: ${pagecounts.count}")
+//
+//pagecounts.filter(_.split(" ")(0) == "en").take(10).foreach(println)
+//pagecounts.filter(_.split(" ")(0) == "en").count()
+
 //sc.stop()
