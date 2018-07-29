@@ -30,7 +30,9 @@ initialCommands in console := """
   conf.setAppName("Simple Console Application")
 
   val sc = SparkContext.getOrCreate(conf)
-  |org.apache.spark.SPARK_VERSION
+  print("sparkVersion" + org.apache.spark.SPARK_VERSION + "\n")
+  org.apache.spark.SparkEnv.get.conf.toDebugString
+
 """
 
 // For Spqrk SQL use
