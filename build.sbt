@@ -29,14 +29,17 @@ initialCommands in console := """
   conf.setMaster("local[*]")
   conf.setAppName("Simple Console Application")
 
- val sc = new SparkContext(conf)
+  val sc = SparkContext.getOrCreate(conf)
+  |org.apache.spark.SPARK_VERSION
+"""
 
+// For Spqrk SQL use
+//  import org.apache.spark.SparkSession
+//
 //  val spark = SparkSession.builder()
 //    .master("local")
 //    .appName("spark-shell")
 //    .getOrCreate()
 //  import spark.implicits._
-//  val sc = spark.sparkContext
-"""
 
 cleanupCommands in console := "sc.stop()"

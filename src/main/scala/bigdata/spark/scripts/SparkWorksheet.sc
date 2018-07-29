@@ -1,10 +1,10 @@
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{SparkConf, SparkContext, SparkEnv}
 
 val conf = new SparkConf()
 conf.setMaster("local[*]")
 conf.setAppName("Simple Application")
 
-val sc = new SparkContext(conf)
+val sc = SparkContext.getOrCreate(conf)
 
 val logFile = "/opt/local/spark-2.2.1-bin-hadoop2.7/README.md"
 val logData = sc.textFile(logFile).cache()
@@ -13,4 +13,14 @@ val numBs = logData.filter(line => line.contains("b")).count()
 
 println(s"Lines with a: $numAs, Lines with b: $numBs")
 
-sc.stop()
+val rdd = sc.parallelize(List("Apples", "bananas", "APPLES", "pears", "Bananas"))
+rdd.toDebugString
+val rdd2 = rdd.map(_.toLowerCase).filter(_.startsWith("a"))
+println("total partitions: " + rdd.getNumPartitions)  // how many? why?
+
+rdd2.dependencies // this is the source/root RDD
+rdd2.toDebugString
+
+SparkEnv.get.closureSerializer
+
+//sc.stop()
