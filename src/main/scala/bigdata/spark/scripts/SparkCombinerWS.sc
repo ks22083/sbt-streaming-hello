@@ -22,6 +22,13 @@ val inputrdd = sc.parallelize(Seq(
   ("physics", 66), ("physics", 61), ("physics", 87), ("english", 70)),
   2)
 
+inputrdd.aggregateByKey((0,0))(
+  seqOp =  (acc, value) => (acc._1 + value, acc._2 + 1),
+  combOp = (acc1, acc2) => (acc1._1 + acc2._1, acc2._1 + acc2._2)
+)
+//  .mapValues(i => i._1/i._2)
+  .take(3)
+
 inputrdd.getNumPartitions
 showRddPartitions(inputrdd)
 

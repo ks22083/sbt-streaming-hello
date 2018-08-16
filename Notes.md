@@ -24,7 +24,7 @@ $ sbt
 [info] sbt server started at local:///home/user/.sbt/1.0/server/8400c48360dc66ed869f/sock
 ```
 With console you can evaluate current project settings for example
-```scala
+```bash
 sbt:sbt-streaming-hello> show libraryDependencies
 [info] * org.scala-lang:scala-library:2.11.12
 [info] * org.scalaj:scalaj-http:2.3.0
